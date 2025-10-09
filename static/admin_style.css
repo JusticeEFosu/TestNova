@@ -74,3 +74,44 @@ h1, h2 {
 .delete-btn:hover {
     background: #c62828;
 }
+
+.admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.admin-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.home-btn, .logout-btn {
+  padding: 8px 16px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: 0.3s ease;
+}
+
+.home-btn {
+  background: linear-gradient(135deg, #0072ff, #00c6ff);
+  color: white;
+}
+
+.logout-btn {
+  background: linear-gradient(135deg, #ff4b2b, #ff416c);
+  color: white;
+}
+
+.home-btn:hover {
+  background: linear-gradient(135deg, #3399ff, #33ccff);
+  transform: scale(1.05);
+}
+
+.logout-btn:hover {
+  background: linear-gradient(135deg, #ff6a4c, #ff6386);
+  transform: scale(1.05);
+}
+

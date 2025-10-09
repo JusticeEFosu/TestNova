@@ -10,8 +10,8 @@
     <div class="container">
         <h1>Exam Results</h1>
         <p><strong>Name:</strong> {{ username }}</p>
-        <p><strong>Score:</strong> {{ score }} / {{ total_questions }}</p>
-        <p><strong>Percentage:</strong> {{ (score / total_questions * 100) | round(2) }}%</p>
+        <p><strong>Score:</strong> {{ score }} / {{ 50 }}</p>
+        <p><strong>Percentage:</strong> {{ (score / 50 * 100) | round(2) }}%</p>
 
         {% if score / total_questions >= 0.8 %}
             <p class="feedback success">Excellent work! You really know your stuff.</p>

@@ -8,7 +8,13 @@
 </head>
 <body>
     <div class="container">
-        <h1>Admin Panel</h1>
+        <header class="admin-header">
+            <h1>Admin Panel</h1>
+            <div class="admin-buttons">
+                <a href="{{ url_for('index') }}" class="home-btn">Home</a>
+                <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
+            </div>
+        </header>
 
         <form method="POST" class="admin-form">
             <h2>Add New Question</h2>
