@@ -1,75 +1,105 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - Exam App</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='admin_style.css') }}">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Panel - Exam App</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f9fafb;
+    }
+  </style>
 </head>
-<body>
-    <div class="container">
-        <header class="admin-header">
-            <h1>Admin Panel</h1>
-            <div class="admin-buttons">
-                <a href="{{ url_for('index') }}" class="home-btn">Home</a>
-                <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
-            </div>
-        </header>
-
-        <form method="POST" class="admin-form">
-            <h2>Add New Question</h2>
-            <label>Question:</label>
-            <textarea name="question_text" required></textarea>
-
-            <label>Option 1:</label>
-            <input type="text" name="option1" required>
-
-            <label>Option 2:</label>
-            <input type="text" name="option2" required>
-
-            <label>Option 3:</label>
-            <input type="text" name="option3" required>
-
-            <label>Option 4:</label>
-            <input type="text" name="option4" required>
-
-            <label>Correct Option (1–4):</label>
-            <input type="number" name="correct_option" min="1" max="4" required>
-
-            <button type="submit">Add Question</button>
-        </form>
-
-        <h2>All Questions</h2>
-        <table class="question-table">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Question</th>
-                    <th>Option 1</th>
-                    <th>Option 2</th>
-                    <th>Option 3</th>
-                    <th>Option 4</th>
-                    <th>Answer</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for q in questions %}
-                <tr>
-                    <td>{{ q.id }}</td>
-                    <td>{{ q.question_text }}</td>
-                    <td>{{ q.option1 }}</td>
-                    <td>{{ q.option2 }}</td>
-                    <td>{{ q.option3 }}</td>
-                    <td>{{ q.option4 }}</td>
-                    <td>{{ q.correct_option }}</td>
-                    <td><a href="{{ url_for('delete_question', id=q.id) }}" class="delete-btn">Delete</a></td>
-                </tr>
-                {% else %}
-                <tr><td colspan="8">No questions found.</td></tr>
-                {% endfor %}
-            </tbody>
-        </table>
+<body class="min-h-screen flex flex-col">
+  
+  <!-- Navbar -->
+  <nav class="bg-indigo-600 text-white px-6 py-4 flex justify-between items-center shadow">
+    <h1 class="text-2xl font-semibold">Admin Panel</h1>
+    <div class="space-x-4">
+      <a href="{{ url_for('index') }}" class="hover:underline">Home</a>
+      <a href="{{ url_for('logout') }}" class="bg-white text-indigo-600 px-3 py-1 rounded-md font-medium hover:bg-indigo-100 transition">Logout</a>
     </div>
+  </nav>
+
+  <main class="flex-grow px-6 py-8">
+    <!-- Add Question Form -->
+    <section class="max-w-3xl mx-auto bg-white p-6 rounded-2xl shadow-md mb-10">
+      <h2 class="text-xl font-semibold mb-4 text-indigo-700">Add New Question</h2>
+      <form method="POST" class="space-y-4">
+        <div>
+          <label class="block mb-1 font-medium">Question:</label>
+          <textarea name="question_text" class="w-full border border-gray-300 rounded-md p-2" required></textarea>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block mb-1 font-medium">Option 1:</label>
+            <input type="text" name="option1" class="w-full border border-gray-300 rounded-md p-2" required>
+          </div>
+          <div>
+            <label class="block mb-1 font-medium">Option 2:</label>
+            <input type="text" name="option2" class="w-full border border-gray-300 rounded-md p-2" required>
+          </div>
+          <div>
+            <label class="block mb-1 font-medium">Option 3:</label>
+            <input type="text" name="option3" class="w-full border border-gray-300 rounded-md p-2" required>
+          </div>
+          <div>
+            <label class="block mb-1 font-medium">Option 4:</label>
+            <input type="text" name="option4" class="w-full border border-gray-300 rounded-md p-2" required>
+          </div>
+        </div>
+
+        <div>
+          <label class="block mb-1 font-medium">Correct Option (1–4):</label>
+          <input type="number" name="correct_option" min="1" max="4" class="w-full border border-gray-300 rounded-md p-2" required>
+        </div>
+
+        <button type="submit" class="bg-indigo-600 text-white px-6 py-2 rounded-md font-medium hover:bg-indigo-700 transition">Add Question</button>
+      </form>
+    </section>
+
+    <!-- Questions Table -->
+    <section class="max-w-6xl mx-auto bg-white p-6 rounded-2xl shadow-md">
+      <h2 class="text-xl font-semibold mb-4 text-indigo-700">All Questions</h2>
+      <div class="overflow-x-auto">
+        <table class="min-w-full border border-gray-200 rounded-lg overflow-hidden">
+          <thead class="bg-indigo-100">
+            <tr>
+              <th class="py-2 px-3 text-left">ID</th>
+              <th class="py-2 px-3 text-left">Question</th>
+              <th class="py-2 px-3 text-left">Option 1</th>
+              <th class="py-2 px-3 text-left">Option 2</th>
+              <th class="py-2 px-3 text-left">Option 3</th>
+              <th class="py-2 px-3 text-left">Option 4</th>
+              <th class="py-2 px-3 text-left">Answer</th>
+              <th class="py-2 px-3 text-center">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for q in questions %}
+            <tr class="border-t border-gray-200 hover:bg-gray-50">
+              <td class="py-2 px-3">{{ q.id }}</td>
+              <td class="py-2 px-3">{{ q.question_text }}</td>
+              <td class="py-2 px-3">{{ q.option1 }}</td>
+              <td class="py-2 px-3">{{ q.option2 }}</td>
+              <td class="py-2 px-3">{{ q.option3 }}</td>
+              <td class="py-2 px-3">{{ q.option4 }}</td>
+              <td class="py-2 px-3">{{ q.correct_option }}</td>
+              <td class="py-2 px-3 text-center">
+                <a href="{{ url_for('delete_question', id=q.id) }}" class="text-red-600 hover:underline">Delete</a>
+              </td>
+            </tr>
+            {% else %}
+            <tr><td colspan="8" class="text-center py-4 text-gray-500">No questions found.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
 </body>
 </html>

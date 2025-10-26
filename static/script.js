@@ -7,20 +7,18 @@ document.addEventListener('DOMContentLoaded', function() {
   const progress = document.getElementById('progress');
   let currentQuestion = 0;
 
-  // ✅ Build numbered question buttons (updated: add utility classes so they show as boxes with CDN)
+  // ✅ Build numbered question buttons
   const btnWrapper = document.createElement('div');
-  btnWrapper.classList.add('nav-grid'); // CSS in your HTML should style this (.nav-grid -> grid layout)
+  btnWrapper.classList.add('nav-grid');
   navContainer.appendChild(btnWrapper);
 
   questions.forEach((_, i) => {
     const btn = document.createElement('button');
     btn.textContent = i + 1;
     btn.type = 'button';
-
-    // visible base styles (Tailwind utility classes are safe with CDN)
     btn.classList.add(
-      'nav-btn',               // base class (we style .nav-btn in plain CSS in the template)
-      'w-10', 'h-10',          // size
+      'nav-btn',
+      'w-10', 'h-10',
       'flex', 'items-center', 'justify-center',
       'rounded-md',
       'border', 'border-gray-300',
@@ -44,10 +42,8 @@ document.addEventListener('DOMContentLoaded', function() {
     updateNavButtons();
     updateButtons();
 
-    // ensure the current nav button is visible in the nav panel (scroll into view)
     const activeBtn = navButtons[currentQuestion];
     if (activeBtn && typeof activeBtn.scrollIntoView === 'function') {
-      // only scroll if the nav panel is scrollable; use nearest block to avoid jumping the whole page
       activeBtn.scrollIntoView({ block: 'nearest', inline: 'nearest' });
     }
   }
@@ -65,7 +61,7 @@ document.addEventListener('DOMContentLoaded', function() {
     submitBtn.style.display = currentQuestion === questions.length - 1 ? 'inline-block' : 'none';
   }
 
-  // ✅ Update answered states
+  // ✅ Mark answered questions
   document.querySelectorAll('input[type="radio"]').forEach(input => {
     input.addEventListener('change', () => {
       const qDiv = input.closest('.question');
@@ -84,9 +80,12 @@ document.addEventListener('DOMContentLoaded', function() {
     if (currentQuestion > 0) showQuestion(currentQuestion - 1);
   });
 
+
+
   // ✅ Initialize first question
   showQuestion(0);
 });
+
 
 // ================== TIMER ==================
 const timerDisplay = document.getElementById('timer');
@@ -95,6 +94,7 @@ let totalSeconds = 3600; // 60 minutes
 function updateTimer() {
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = totalSeconds % 60;
+
   if (timerDisplay) {
     timerDisplay.textContent = `Time Left: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
 
