@@ -1,2 +1,9 @@
 .env
 __pycache__
+*.pyc
+*.pyo
+*.log
+exam_app_backup.sql
+testnova_postgres.sql
+convert_db.py
+node_modules/
