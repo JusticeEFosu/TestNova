@@ -1,5 +1,4 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash
-import mysql.connector
 import random
 import os
 from dotenv import load_dotenv
@@ -11,14 +10,47 @@ load_dotenv()
 app = Flask(__name__)
 app.secret_key = os.getenv("FLASK_SECRET_KEY", os.urandom(24))
 
-# ------------------ DATABASE CONNECTION ------------------
-db = mysql.connector.connect(
-    host=os.getenv("DB_HOST", "localhost"),
-    user=os.getenv("DB_USER", "root"),
-    password=os.getenv("DB_PASS"),
-    database=os.getenv("DB_NAME", "exam_app")
-)
-cursor = db.cursor(dictionary=True)
+# ------------------ DATABASE CONNECTION WITH DUAL SUPPORT ------------------
+IS_PRODUCTION = os.getenv('DATABASE_URL') is not None  # True on Render, False locally
+
+if IS_PRODUCTION:
+    # Production: PostgreSQL on Render
+    print("🌐 Running in PRODUCTION mode (PostgreSQL)")
+    import psycopg2
+    from psycopg2.extras import RealDictCursor
+    
+    DATABASE_URL = os.getenv('DATABASE_URL')
+    # Render provides postgres:// but psycopg2 needs postgresql://
+    if DATABASE_URL.startswith("postgres://"):
+        DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+    
+    db = psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
+else:
+    # Local: MySQL on your laptop
+    print("💻 Running in DEVELOPMENT mode (MySQL)")
+    import mysql.connector
+    
+    db = mysql.connector.connect(
+        host=os.getenv("DB_HOST", "localhost"),
+        user=os.getenv("DB_USER", "root"),
+        password=os.getenv("DB_PASS"),
+        database=os.getenv("DB_NAME", "exam_app")
+    )
+
+# Helper function to get cursor (handles both databases)
+def get_cursor():
+    if IS_PRODUCTION:
+        return db.cursor()
+    else:
+        return db.cursor(dictionary=True)
+
+cursor = get_cursor()
+
+# Helper function to commit and refresh cursor
+def commit_db():
+    db.commit()
+    global cursor
+    cursor = get_cursor()
 
 
 # ------------------ HOME PAGE ------------------
@@ -45,7 +77,7 @@ def exam():
             
             # Clear any previous exam attempts for this exam number
             cursor.execute("DELETE FROM exam_attempts WHERE exam_number=%s", (exam_number,))
-            db.commit()
+            commit_db()
             
             # Store in session
             session['exam_number'] = exam_number
@@ -84,11 +116,11 @@ def exam():
                         VALUES (%s, %s, %s, %s, %s)
                     """, (exam_number, username, q_id, int(selected), is_correct))
             
-            db.commit()
+            commit_db()
 
             # Save overall result
             cursor.execute("INSERT INTO results (user_name, score) VALUES (%s, %s)", (username, score))
-            db.commit()
+            commit_db()
             
             # Store score in session for review page
             session['last_score'] = score
@@ -193,7 +225,7 @@ def admin():
                 INSERT INTO questions (question_text, option1, option2, option3, option4, correct_option, explanation)
                 VALUES (%s, %s, %s, %s, %s, %s, %s)
             """, (question_text, option1, option2, option3, option4, correct_option, explanation))
-            db.commit()
+            commit_db()
             flash('Question added successfully!', 'success')
             return redirect(url_for('admin'))
         
@@ -214,7 +246,7 @@ def admin():
                     correct_option=%s, explanation=%s
                 WHERE id=%s
             """, (question_text, option1, option2, option3, option4, correct_option, explanation, question_id))
-            db.commit()
+            commit_db()
             flash('Question updated successfully!', 'success')
             return redirect(url_for('admin'))
         
@@ -233,7 +265,7 @@ def admin():
                     INSERT INTO exam_numbers (exam_number, student_name)
                     VALUES (%s, %s)
                 """, (exam_number, student_name))
-                db.commit()
+                commit_db()
                 flash('Exam number added successfully!', 'success')
             
             return redirect(url_for('admin'))
@@ -246,21 +278,6 @@ def admin():
     
     return render_template('admin.html', questions=questions, exam_numbers=exam_numbers)
 
-# ------------------ GET QUESTION FOR EDIT ------------------
-@app.route('/get-question/<int:id>')
-def get_question(id):
-    if not session.get('admin_logged_in'):
-        return redirect(url_for('admin_login'))
-    
-    cursor.execute("SELECT * FROM questions WHERE id=%s", (id,))
-    question = cursor.fetchone()
-    
-    if question:
-        return render_template('edit_question.html', question=question)
-    else:
-        flash('Question not found!', 'error')
-        return redirect(url_for('admin'))
-
 # ------------------ DELETE QUESTION ------------------
 @app.route('/delete/<int:id>')
 def delete_question(id):
@@ -268,7 +285,7 @@ def delete_question(id):
         return redirect(url_for('admin_login'))
 
     cursor.execute("DELETE FROM questions WHERE id = %s", (id,))
-    db.commit()
+    commit_db()
     flash('Question deleted!', 'success')
     return redirect(url_for('admin'))
 
@@ -279,7 +296,7 @@ def delete_exam_number(id):
         return redirect(url_for('admin_login'))
 
     cursor.execute("DELETE FROM exam_numbers WHERE id = %s", (id,))
-    db.commit()
+    commit_db()
     flash('Exam number deleted!', 'success')
     return redirect(url_for('admin'))
 
